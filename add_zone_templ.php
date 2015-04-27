@@ -58,6 +58,14 @@ if (!do_hook('verify_permission' , 'zone_master_add' )) {
     echo "       <th>" . _('Description') . "</th>\n";
     echo "       <td><input class=\"wide\" type=\"text\" name=\"templ_descr\" value=\"\"></td>\n";
     echo "      </tr>\n";
+    echo "      <tr>\n";
+
+    if (do_hook('verify_permission' , 'zone_master_global' )) {
+        echo "       <th>" . _('Global') . "</th>\n";
+        echo "       <td><input type=\"checkbox\" name=\"templ_global\"></td>\n";
+        echo "      </tr>\n";
+    }
+
     echo "     </table>\n";
     echo "     <input type=\"submit\" class=\"button\" name=\"commit\" value=\"" . _('Add zone template') . "\">\n";
     echo "     </form>\n";

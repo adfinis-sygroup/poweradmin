@@ -32,12 +32,13 @@
 require_once("inc/toolkit.inc.php");
 include_once("inc/header.inc.php");
 
-do_hook('verify_permission', 'zone_master_add') ? $perm_zone_master_add = "1" : $perm_zone_master_add = "0";
+$perm_zone_master_add    = (bool)do_hook('verify_permission', 'zone_master_add');
+$perm_zone_master_global = (bool)do_hook('verify_permission', 'zone_master_global');
 
 $zone_templates = get_list_zone_templ($_SESSION['userid']);
 $username = do_hook('get_fullname_from_userid', $_SESSION['userid']);
 
-if ($perm_zone_master_add == "0") {
+if (!$perm_zone_master_add) {
     error(ERR_PERM_EDIT_ZONE_TEMPL);
 } else {
     echo "    <h2>" . _('Zone templates for') . " " . $username . "</h2>\n";
@@ -46,21 +47,33 @@ if ($perm_zone_master_add == "0") {
     echo "       <th>&nbsp;</th>\n";
     echo "       <th>" . _('Name') . "</th>\n";
     echo "       <th>" . _('Description') . "</th>\n";
+
+    if ($perm_zone_master_global) {
+        echo "       <th>" . _('Global') . "</th>\n";
+    }
+
     echo "      </tr>\n";
 
     foreach ($zone_templates as $template) {
 
         echo "      <tr>\n";
-        if ($perm_zone_master_add == "1") {
+        if ($perm_zone_master_add) {
             echo "       <td>\n";
-            echo "        <a href=\"edit_zone_templ.php?id=" . $template["id"] . "\"><img src=\"images/edit.gif\" alt=\"[ " . _('Edit template') . " ]\"></a>\n";
-            echo "        <a href=\"delete_zone_templ.php?id=" . $template["id"] . "\"><img src=\"images/delete.gif\" alt=\"[ " . _('Delete template') . " ]\"></a>\n";
+            if (($template['global'] && $perm_zone_master_global) || !$template['global']) {
+                echo "        <a href=\"edit_zone_templ.php?id=" . $template["id"] . "\"><img src=\"images/edit.gif\" alt=\"[ " . _('Edit template') . " ]\"></a>\n";
+                echo "        <a href=\"delete_zone_templ.php?id=" . $template["id"] . "\"><img src=\"images/delete.gif\" alt=\"[ " . _('Delete template') . " ]\"></a>\n";
+            }
             echo "       </td>\n";
         } else {
             echo "       <td>&nbsp;</td>\n";
         }
         echo "       <td class=\"y\">" . $template['name'] . "</td>\n";
         echo "       <td class=\"y\">" . $template['descr'] . "</td>\n";
+
+        if ($perm_zone_master_global) {
+            echo "       <td class=\"y\">" . ($template['global'] ? _('Yes') : _('No')) . "</td>\n";
+        }
+
         echo "      </tr>\n";
     }
 

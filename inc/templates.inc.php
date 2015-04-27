@@ -40,7 +40,7 @@ function get_list_zone_templ($userid) {
     global $db;
 
     $query = "SELECT * FROM zone_templ "
-            . "WHERE owner = '" . $userid . "' "
+            . "WHERE owner = '" . $userid . "' OR global='1'"
             . "ORDER BY name";
     $result = $db->query($query);
     if (PEAR::isError($result)) {
@@ -53,7 +53,8 @@ function get_list_zone_templ($userid) {
         $zone_templ_list[] = array(
             "id" => $zone_templ['id'],
             "name" => $zone_templ['name'],
-            "descr" => $zone_templ['descr']
+            "descr" => $zone_templ['descr'],
+            "global" => $zone_templ['global']
         );
     }
     return $zone_templ_list;
@@ -70,17 +71,20 @@ function add_zone_templ($details, $userid) {
     global $db;
 
     $zone_name_exists = zone_templ_name_exists($details['templ_name']);
+    $global = isset($details['templ_global']) && do_hook('verify_permission' , 'zone_master_global') ? 1 : 0;
+
     if (!(do_hook('verify_permission' , 'zone_master_add' ))) {
         error(ERR_PERM_ADD_ZONE_TEMPL);
         return false;
     } elseif ($zone_name_exists != '0') {
         error(ERR_ZONE_TEMPL_EXIST);
     } else {
-        $query = "INSERT INTO zone_templ (name, descr, owner)
+        $query = "INSERT INTO zone_templ (name, descr, owner, global)
 			VALUES ("
                 . $db->quote($details['templ_name'], 'text') . ", "
                 . $db->quote($details['templ_descr'], 'text') . ", "
-                . $db->quote($userid, 'integer') . ")";
+                . $db->quote($userid, 'integer') . ", "
+                . $db->quote($global) . ")";
 
         $result = $db->query($query);
         if (PEAR::isError($result)) {
@@ -552,6 +556,9 @@ function get_list_zone_use_templ($zone_templ_id, $userid) {
 function edit_zone_templ($details, $zone_templ_id) {
     global $db;
     $zone_name_exists = zone_templ_name_exists($details['templ_name'], $zone_templ_id);
+
+    $global = isset($details['templ_global']) && do_hook('verify_permission' , 'zone_master_global') ? 1 : 0;
+
     if (!(do_hook('verify_permission' , 'zone_master_add' ))) {
         error(ERR_PERM_ADD_ZONE_TEMPL);
         return false;
@@ -560,9 +567,10 @@ function edit_zone_templ($details, $zone_templ_id) {
         return false;
     } else {
         $query = "UPDATE zone_templ
-			SET name=" . $db->quote($details['templ_name'], 'text') . ",
-			descr=" . $db->quote($details['templ_descr'], 'text') . "
-			WHERE id=" . $db->quote($zone_templ_id, 'integer');
+            SET name=" . $db->quote($details['templ_name'], 'text') . ",
+            descr=" . $db->quote($details['templ_descr'], 'text') . ",
+            global=" . $db->quote($global, 'integer') . "
+            WHERE id=" . $db->quote($zone_templ_id, 'integer');
 
         $result = $db->query($query);
         if (PEAR::isError($result)) {

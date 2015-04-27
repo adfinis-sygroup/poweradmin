@@ -190,6 +190,13 @@ if (!(do_hook('verify_permission' , 'zone_master_add' )) || !$owner) {
         echo "       <th>" . _('Description') . "</th>\n";
         echo "       <td><input class=\"wide\" type=\"text\" name=\"templ_descr\" value=\"" . $templ_details['descr'] . "\"></td>\n";
         echo "      </tr>\n";
+
+        if (do_hook('verify_permission' , 'zone_master_global' )) {
+            echo "       <th>" . _('Global') . "</th>\n";
+            echo "       <td><input type=\"checkbox\" name=\"templ_global\"". ($templ_details['global'] ? " checked" : "") . "></td>\n";
+            echo "      </tr>\n";
+        }
+
         echo "     </table>\n";
         echo "     <input type=\"submit\" class=\"button\" name=\"edit\" value=\"" . _('Commit changes') . "\">\n";
         echo "     </form>\n";
