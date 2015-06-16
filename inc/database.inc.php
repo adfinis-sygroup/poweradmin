@@ -132,6 +132,7 @@ function dbConnect() {
     }
 
     $db = new PDOLayer($dsn, $db_user, $db_pass);
+    $db->exec("set names utf8");
 
     if (isset($db_debug) && $db_debug) {
         $db->setOption('debug', 1);
